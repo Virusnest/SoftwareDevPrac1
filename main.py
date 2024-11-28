@@ -1,3 +1,4 @@
+from operator import attrgetter
 list = []
 totals = []
 
@@ -6,6 +7,16 @@ class Plan:
     Name=""
     UpfrountCost=0
     MonthlyCost=0
+
+class ResultType:
+    NONE=0
+    BEST=1
+    WORST=2
+
+class Result:
+    Name=""
+    TotalCost=0
+    Status=ResultType.BEST
 
 def loadfile(filename):
     with open(filename) as file:
@@ -30,23 +41,28 @@ def printlist():
     for plan in list:
         print(plan.Name,"$"+str(plan.UpfrountCost), "$"+str(plan.MonthlyCost))
 
-def calculate():
+def calculate(time):
     # calculate the total cost for each plan
-    for plan in list:
-        total = plan.UpfrountCost + (plan.MonthlyCost * time)
-        totals.append(total)
+    for i in range(time):
+        period =[]
+        totals = []
+        for plan in list:
+            total = plan.UpfrountCost + plan.MonthlyCost * time
+            totals.append(total)
+        best = min(totals)
+        worst = max(totals)
+        for i in range(len(list)):
+            if totals[i] == best:
+                period.append(Result(list[i].Name, totals[i], ResultType.BEST))
+            elif totals[i] == worst:
+                period.append(Result(list[i].Name, totals[i], ResultType.WORST))
+            else:
+                period.append(Result(list[i].Name, totals[i], ResultType.NONE))
+
+        totals.append(period)
 
 def printtotals():
-    best = min(totals)
-    worst = max(totals)
-    # print the best and worst plans
-    print("Name | Total")
-    for i in range(len(list)):
-        if totals[i] == best:
-            print("Best Plan: ", end='')
-        elif totals[i] == worst:
-            print("Worst Plan: ",end='')
-        print(list[i].Name,"$"+ str(totals[i]))
+    # get the min and max total costs from the last period in the totals list
 
 def printsummery():
     best = (min(totals))
