@@ -1,4 +1,6 @@
 list = []
+totals = []
+
 time=0
 class Plan:
     Name=""
@@ -29,23 +31,27 @@ def printlist():
         print(plan.Name,"$"+str(plan.UpfrountCost), "$"+str(plan.MonthlyCost))
 
 def calculate():
-    totals = []
     # calculate the total cost for each plan
     for plan in list:
         total = plan.UpfrountCost + (plan.MonthlyCost * time)
         totals.append(total)
-    # find largest and smallest total
+
+def printtotals():
     best = min(totals)
     worst = max(totals)
     # print the best and worst plans
-    print("Name | Upfront | Monthly")
-
+    print("Name | Total")
     for i in range(len(list)):
         if totals[i] == best:
             print("Best Plan: ", end='')
         elif totals[i] == worst:
             print("Worst Plan: ",end='')
         print(list[i].Name,"$"+ str(totals[i]))
+
+def printsummery():
+    best = (min(totals))
+    worst = (max(totals),)
+    print("Your best plan is: ", end='')
 
 
 loadfile("plans.txt")
@@ -55,3 +61,4 @@ print("Enter time period in months")
 time = int(input())
 
 calculate()
+printtotals()
