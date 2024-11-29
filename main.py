@@ -116,4 +116,7 @@ time = int(input())
 
 calculate(time)
 printtotals()
-printsummery()
+# ask to print summery
+print("Do you want to print the summery? (Y/n)")
+if input().lower() != "n":
+    printsummery()
