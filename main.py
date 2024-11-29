@@ -1,7 +1,6 @@
 from operator import attrgetter
 plans = []
 totals = []
-time=0
 
 # Plan class to hold the plan details
 class Plan:
