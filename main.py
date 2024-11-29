@@ -1,23 +1,27 @@
 from operator import attrgetter
-list = []
+plans = []
 totals = []
 time=0
+
+# Plan class to hold the plan details
 class Plan:
     Name=""
     UpfrountCost=0
     MonthlyCost=0
 
+# Enum for the result type
 class ResultType:
     NONE=0
     BEST=1
     WORST=2
 
+# Result class to hold the result of the calculation
 class Result:
     Name=""
     TotalCost=0
     Status=ResultType.BEST
 
-def loadfile(filename):
+def loadFile(filename):
     with open(filename) as file:
         for line in file:
             # ignore comments
@@ -33,11 +37,11 @@ def loadfile(filename):
             plan.MonthlyCost = int(parts[2])
 
             # add the plan object to the list
-            list.append(plan)
+            plans.append(plan)
 
-def printlist():
+def printList():
     print("Name | Upfront | Monthly")
-    for plan in list:
+    for plan in plans:
         print(plan.Name,"$"+str(plan.UpfrountCost), "$"+str(plan.MonthlyCost))
 
 def calculate(t):
@@ -45,34 +49,34 @@ def calculate(t):
     for i in range(t):
         period =[]
         _totals = []
-        for plan in list:
+        for plan in plans:
             total = plan.UpfrountCost + plan.MonthlyCost * i
             _totals.append(total)
         best = min(_totals)
         worst = max(_totals)
-        for i in range(len(list)):
+        for i in range(len(plans)):
             if _totals[i] == best:
                 result = Result()
-                result.Name = list[i].Name
+                result.Name = plans[i].Name
                 result.TotalCost = _totals[i]
                 result.Status = ResultType.BEST
                 period.append(result)
             elif _totals[i] == worst:
                 result = Result()
-                result.Name = list[i].Name
+                result.Name = plans[i].Name
                 result.TotalCost = _totals[i]
                 result.Status = ResultType.WORST
                 period.append(result)
             else:
                 result = Result()
-                result.Name = list[i].Name
+                result.Name = plans[i].Name
                 result.TotalCost = _totals[i]
                 result.Status = ResultType.NONE
                 period.append(result)
         totals.append(period)
 
 
-def printtotals():
+def printTotals():
     # get the min and max total costs from the last period in the totals list
     best = [pln for pln in totals[len(totals)-1] if pln.Status == ResultType.BEST]
     worst = [pln for pln in totals[len(totals)-1] if pln.Status == ResultType.WORST]
@@ -86,7 +90,7 @@ def printtotals():
         else:
             print(pln.Name, "$"+str(pln.TotalCost))
 
-def printsummery():
+def printSummery():
     # loop through all periods and find out when each plan becomes the best
     oldstatus = []
     beststatus = []
@@ -108,15 +112,15 @@ def printsummery():
     for i in range(len(beststatus)):
         print(beststatus[i][0], "becomes the best after", beststatus[i][1], "months")
 
-loadfile("plans.txt")
-printlist()
+loadFile("plans.txt")
+printList()
 
 print("Enter time period in months")
 time = int(input())
 
 calculate(time)
-printtotals()
+printTotals()
 # ask to print summery
 print("Do you want to print the summery? (Y/n)")
 if input().lower() != "n":
-    printsummery()
+    printSummery()
