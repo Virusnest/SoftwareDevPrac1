@@ -53,6 +53,19 @@ def calculateTotals(t):
         total = plan.UpfrountCost + (plan.MonthlyCost * t)
         totals.append(total)
 
+def findClosestIntersection(p1, list):
+    # find the closest intersection in a list of plans
+    closest = None
+    for plan in list:
+        inter = intersection(p1, plan)
+        if closest is None:
+            closest = inter
+        if inter is None:
+            break
+        if inter[0] < closest[0]:
+            closest = inter
+    return closest
+
 def calculateSummery(t):
     # sort the plans by upfront cost
     plans.sort(key=attrgetter('UpfrountCost'))
@@ -66,16 +79,10 @@ def calculateSummery(t):
     # loop through intersection path
     while (len(plans)!=0):
         # Find the closest intersection
-        closest = None
-        for plan in plans:
-            inter = intersection(currentBest, plan)
-            if closest is None:
-                closest = inter
-            if inter is None:
-                finish = True
-                break
-            if inter[0] < closest[0]:
-                closest = inter
+        closest = findClosestIntersection(currentBest, plans)
+        if closest is None:
+            finish = True
+            break
         # if an intersection is found add the plan to the results
         if len(plans)!=0:
             currentBest = plans.pop(plans.index(closest[1]))
