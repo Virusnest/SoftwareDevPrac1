@@ -26,13 +26,13 @@ Goal: Find the spans of time any given linear equation is smaller than any other
     sort(equations, key="y_intercept")
     currentequation = equations.pop(0)
     spans.append([0, currentequation])
-    while len(equations) != 0 {
-        for i in range(1, len(equations)){
+    while (len(equations) != 0) {
+        for (i in range(1, len(equations))){
             intersection = find_closest_intersection(currentequation, equations)
-            if intersection or list is not empty{
-                spans.append([intersection, equations.pop(currentequation)])
+            if( list is empty or intersection is None ){
                 break
             }
+            spans.append([intersection, equations.pop(currentequation)])
         }
     }
 ```

@@ -58,10 +58,10 @@ def findClosestIntersection(p1, list):
     closest = None
     for plan in list:
         inter = intersection(p1, plan)
+        if inter is None:
+            continue
         if closest is None:
             closest = inter
-        if inter is None:
-            break
         if inter[0] < closest[0]:
             closest = inter
     return closest
@@ -83,13 +83,14 @@ def calculateSummery(t):
         if closest is None:
             finish = True
             break
+        if len(plans)==0:
+             break
         # if an intersection is found add the plan to the results
-        if len(plans)!=0:
-            currentBest = plans.pop(plans.index(closest[1]))
-            result = Result()
-            result.Name = closest[1].Name
-            result.IntersectionX = closest[0]
-            results.append(result)
+        currentBest = plans.pop(plans.index(closest[1]))
+        result = Result()
+        result.Name = closest[1].Name
+        result.IntersectionX = closest[0]
+        results.append(result)
 
     results.sort(key=attrgetter('IntersectionX'))
 
