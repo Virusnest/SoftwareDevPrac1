@@ -1,5 +1,7 @@
 from operator import attrgetter
+# Runtime Data
 plans = []
+results = []
 totals = []
 
 # Plan class to hold the plan details
@@ -8,17 +10,10 @@ class Plan:
     UpfrountCost=0
     MonthlyCost=0
 
-# Enum for the result type
-class ResultType:
-    NONE=0
-    BEST=1
-    WORST=2
-
 # Result class to hold the result of the calculation
 class Result:
     Name=""
-    TotalCost=0
-    Status=ResultType.BEST
+    IntersectionX=0
 
 def loadFile(filename):
     with open(filename) as file:
@@ -43,83 +38,99 @@ def printList():
     for plan in plans:
         print(plan.Name,"$"+str(plan.UpfrountCost), "$"+str(plan.MonthlyCost))
 
-def calculate(t):
-    # calculate the total cost for each plan
-    for i in range(t):
-        period =[]
-        _totals = []
+def intersection(p1, p2):
+    # calculate the intersection of two lines
+    x = (p2.UpfrountCost - p1.UpfrountCost) / (p1.MonthlyCost - p2.MonthlyCost)
+    y = p1.MonthlyCost * x + p1.UpfrountCost
+    # return none if no intersection is found
+    if x < 0 or y < 0:
+        return None
+    return x, p2
+
+def calculateTotals(t):
+    # calculate the total cost of each plan over the time period
+    for plan in plans:
+        total = plan.UpfrountCost + (plan.MonthlyCost * t)
+        totals.append(total)
+
+def calculateSummery(t):
+    # sort the plans by upfront cost
+    plans.sort(key=attrgetter('UpfrountCost'))
+    # ad the best initial cost first
+    currentBest = plans.pop(0)
+    result = Result()
+    result.Name = currentBest.Name
+    result.IntersectionX = 0
+    results.append(result)
+    finish = False
+    # loop through intersection path
+    while (len(plans)!=0):
+        # Find the closest intersection
+        closest = None
         for plan in plans:
-            total = plan.UpfrountCost + plan.MonthlyCost * i
-            _totals.append(total)
-        best = min(_totals)
-        worst = max(_totals)
-        for i in range(len(plans)):
-            if _totals[i] == best:
-                result = Result()
-                result.Name = plans[i].Name
-                result.TotalCost = _totals[i]
-                result.Status = ResultType.BEST
-                period.append(result)
-            elif _totals[i] == worst:
-                result = Result()
-                result.Name = plans[i].Name
-                result.TotalCost = _totals[i]
-                result.Status = ResultType.WORST
-                period.append(result)
-            else:
-                result = Result()
-                result.Name = plans[i].Name
-                result.TotalCost = _totals[i]
-                result.Status = ResultType.NONE
-                period.append(result)
-        totals.append(period)
+            inter = intersection(currentBest, plan)
+            if closest is None:
+                closest = inter
+            if inter is None:
+                finish = True
+                break
+            if inter[0] < closest[0]:
+                closest = inter
+        # if an intersection is found add the plan to the results
+        if len(plans)!=0:
+            currentBest = plans.pop(plans.index(closest[1]))
+            result = Result()
+            result.Name = closest[1].Name
+            result.IntersectionX = closest[0]
+            results.append(result)
 
+    results.sort(key=attrgetter('IntersectionX'))
 
-def printTotals():
-    # get the min and max total costs from the last period in the totals list
-    best = [pln for pln in totals[len(totals)-1] if pln.Status == ResultType.BEST]
-    worst = [pln for pln in totals[len(totals)-1] if pln.Status == ResultType.WORST]
-
+def printtotals():
+    best = min(totals)
+    worst = max(totals)
+    # print the best and worst plans
     print("Name | Total")
-    for pln in totals[len(totals)-1]:
-        if pln.Status == ResultType.BEST:
-            print(pln.Name, "$"+str(pln.TotalCost), "Best")
-        elif pln.Status == ResultType.WORST:
-            print(pln.Name, "$"+str(pln.TotalCost), "Worst")
-        else:
-            print(pln.Name, "$"+str(pln.TotalCost))
+    for i in range(len(plans)):
+        if totals[i] == best:
+            print("Best Plan: ", end='')
+        elif totals[i] == worst:
+            print("Worst Plan: ",end='')
+        print(plans[i].Name,"$"+ str(totals[i]))
 
 def printSummery():
-    # loop through all periods and find out when each plan becomes the best
-    oldstatus = []
-    beststatus = []
-    for i in range(len(totals)):
-        for j in range(len(totals[i])):
-            if i == 0:
-                oldstatus = totals[i]
-                break
-            if totals[i][j].Status == 1 and (oldstatus[j].Status != 1):
-                 beststatus.append((totals[i][j].Name,i))
-            oldstatus = totals[i]
+    for i in range(len(results)):
+        # print how long the plan is the best for and the point it becomes the best\
+        age = 0
+        if i == len(results)-1:
+            age = time - results[i].IntersectionX
+        else:
+            age = results[i+1].IntersectionX - results[i].IntersectionX
 
-    if len(beststatus) == 0:
-        best = [pln for pln in totals[len(totals) - 1] if pln.Status == ResultType.BEST]
-        for pln in best:
-                print(pln.Name+" stays the best plan over the period")
-        return
-    # print the results as a summery "X becomes the best after y months"
-    for i in range(len(beststatus)):
-        print(beststatus[i][0], "becomes the best after", beststatus[i][1], "months")
+        print(results[i].Name, "is the best plan for", age, "months")
+        print(results[i].Name, "becomes the best plan at", results[i].IntersectionX, "months")
 
+def printTotals():
+    # Print the total cost of all the plans over the time period
+    total = 0
+    for result in results:
+        total += result.UpfrountCost
+    print("Total upfront cost: $"+str(total))
+
+### MAIN PROGRAM ###
 loadFile("plans.txt")
 printList()
 
-print("Enter time period in months")
-time = int(input())
+### MAIN UI AND INTERFACE ###
+print("Would You like a summery of the plans or the total cost of the plans? (S/T)")
 
-calculate(time)
-printTotals()
-# ask to print summery
-print("Do you want to print the summery? (Y/n)")
-if input().lower() != "n":
+if input().lower() == "t":
+    print("Enter time period in months")
+    time = int(input())
+    calculateTotals(time)
+    printtotals()
+else:
+    print("Enter time period in months")
+    time = int(input())
+    calculateSummery(time)
     printSummery()

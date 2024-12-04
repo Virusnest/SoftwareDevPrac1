@@ -1,4 +1,4 @@
 # Plan | Upfront Cost | Cost per Month
-Teltel 1200 20
-Optal 50 50
-Virgo 75 45
+Teltel 20 20
+Loptal 5 25
+Virgo 45 15
